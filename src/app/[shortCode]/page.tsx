@@ -1,25 +1,19 @@
-// app/[shortCode]/route.ts
+import { redirect, notFound } from 'next/navigation';
 
-import { NextRequest, NextResponse } from 'next/server';
-
-export async function GET(request: NextRequest, { params }: { params: { shortCode: string } }) {
-  const { shortCode } = params;
-
+export default async function RedirectPage({ params: { shortCode } }: { params: { shortCode: string } }) {
   try {
-    const response = await fetch(`${process.env.API_URL}/urls/${shortCode}`, { cache: 'no-store' });
+    const res = await fetch(`${process.env.API_URL}/urls/${shortCode}`, {
+      cache: 'no-store',
+    });
 
-    if (!response.ok) {
-      return new NextResponse('URL not found', { status: 404 });
-    }
+    if (!res.ok) return notFound();
 
-    const data = await response.json();
+    const data = await res.json();
 
-    if (typeof data.url !== 'string') {
-      return new NextResponse('Invalid URL format', { status: 500 });
-    }
+    if (typeof data.url !== 'string') return notFound();
 
-    return NextResponse.redirect(data.url);
+    redirect(data.url);
   } catch {
-    return new NextResponse('Error processing redirect', { status: 500 });
+    return <div>Error processing redirect</div>;
   }
 }
