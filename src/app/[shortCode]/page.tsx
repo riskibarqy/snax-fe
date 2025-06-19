@@ -1,42 +1,25 @@
-import { Metadata } from 'next';
+// app/[shortCode]/route.ts
 
-interface Props {
-  params: { shortCode: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-}
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function generateMetadata(
-  { params: { shortCode } }: Props
-): Promise<Metadata> {
-  return {
-    title: `Redirecting... | ${shortCode}`,
-  };
-}
+export async function GET(request: NextRequest, { params }: { params: { shortCode: string } }) {
+  const { shortCode } = params;
 
-export default async function RedirectPage(
-  { params: { shortCode } }: Props
-) {
   try {
-    // Find the URL using the API
-    const response = await fetch(`${process.env.API_URL}/urls/${shortCode}`, {
-      // Add cache: 'no-store' to prevent caching
-      cache: 'no-store'
-    });
-    
+    const response = await fetch(`${process.env.API_URL}/urls/${shortCode}`, { cache: 'no-store' });
+
     if (!response.ok) {
-      return new Response('URL not found', { status: 404 });
+      return new NextResponse('URL not found', { status: 404 });
     }
 
     const data = await response.json();
-    
-    // Ensure data.url is a string
+
     if (typeof data.url !== 'string') {
-      throw new Error('Invalid URL format');
+      return new NextResponse('Invalid URL format', { status: 500 });
     }
 
-    return Response.redirect(data.url);
-  } catch (error) {
-    console.error('Error processing redirect:', error);
-    return new Response('Error processing redirect', { status: 500 });
+    return NextResponse.redirect(data.url);
+  } catch {
+    return new NextResponse('Error processing redirect', { status: 500 });
   }
-} 
+}
