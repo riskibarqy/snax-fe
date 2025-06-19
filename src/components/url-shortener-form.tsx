@@ -18,7 +18,7 @@ type FormData = z.infer<typeof urlSchema>;
 export function URLShortenerForm() {
   const [shortUrl, setShortUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
+  const [ isSignedIn ] = useState<boolean>(false);
   const {
     register,
     handleSubmit,
@@ -36,7 +36,7 @@ export function URLShortenerForm() {
         expiresAt: data.expiresAt,
       };
 
-      const response = await createShortUrl(request);
+      const response = await createShortUrl(request, isSignedIn);
       if (response.error) {
         setError(typeof response.error === 'string' ? response.error : response.error.message);
         return;
