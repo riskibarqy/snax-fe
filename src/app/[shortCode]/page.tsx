@@ -1,19 +1,15 @@
-import { redirect, notFound } from 'next/navigation';
+import { redirect } from 'next/navigation';
 
-export default async function RedirectPage({ params: { shortCode } }: { params: { shortCode: string } }) {
-  try {
-    const res = await fetch(`${process.env.API_URL}/urls/${shortCode}`, {
-      cache: 'no-store',
-    });
+export default async function RedirectPage({ params }: { params: { shortCode: string } }) {
+  const { shortCode } = params;
 
-    if (!res.ok) return notFound();
+  const res = await fetch(`${process.env.API_URL}/urls/${shortCode}`, { cache: 'no-store' });
 
-    const data = await res.json();
+  if (!res.ok) return <div>URL not found</div>;
 
-    if (typeof data.url !== 'string') return notFound();
+  const data = await res.json();
 
-    redirect(data.url);
-  } catch {
-    return <div>Error processing redirect</div>;
-  }
+  if (typeof data.url !== 'string') return <div>Invalid URL format</div>;
+
+  redirect(data.url);
 }
