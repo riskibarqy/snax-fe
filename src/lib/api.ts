@@ -1,9 +1,8 @@
 import { CreateUrlRequest, Url, Domain, Tag, UrlAnalytics, ApiResponse } from './types';
 
-const API_BASE_URL = "https://snax-url-shortener.fly.dev";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
-  console.log(API_BASE_URL, endpoint)
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers: {
@@ -12,7 +11,6 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
     },
   });
 
-  console.log(response);
 
   if (!response.ok) {
     const error = await response.json();
@@ -30,14 +28,6 @@ export async function createShortUrl(data: CreateUrlRequest, isLoggedIn: boolean
     body: JSON.stringify(data),
   });
 }
-
-// URL Management
-// export async function createShortUrl(data: CreateUrlRequest): Promise<ApiResponse<Url>> {
-//   return fetchWithAuth('/urls', {
-//     method: 'POST',
-//     body: JSON.stringify(data),
-//   });
-// }
 
 export async function getUserUrls(): Promise<ApiResponse<Url[]>> {
   return fetchWithAuth('/urls');
